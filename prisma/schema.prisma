@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String    @unique
+  password      String    
+  role          Role      @default(EMPLOYEE)
+  kpiScore      Int       @default(100)
+  forcePasswordChange Boolean @default(false)
+  attendances   Attendance[]
+  passwordResets PasswordResetRequest[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model PasswordResetRequest {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    String   @default("PENDING") // PENDING, RESOLVED
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Role {
+  EMPLOYEE
+  ADMIN
+  INTERN
+}
+
+model Attendance {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String    @db.ObjectId
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Storing the local date (in GMT+7) for easy querying
+  date              DateTime  
+  
+  checkIn           DateTime? // Morning Check-in
+  checkOutLunch     DateTime? // Lunch Check-out
+  checkInAfternoon  DateTime? // Afternoon Check-in
+  checkOut          DateTime? // Evening Check-out
+  
+  // GPS Coordinates (captured during first check-in)
+  latitude          Float?
+  longitude         Float?
+
+  status            AttendanceStatus @default(ON_TIME)
+  hasApprovedLeave  Boolean   @default(false)
+  earlyLeaveReason  String?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([userId, date])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ON_TIME
+  LATE_MORNING
+  LATE_AFTERNOON
+  EARLY_LEAVE
+  ABSENT
+  ON_LEAVE
+}
