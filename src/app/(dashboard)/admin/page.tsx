@@ -12,7 +12,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   
   // Filters
-  const [searchDate, setSearchDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' }));
+  const [startDate, setStartDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' }));
+  const [endDate, setEndDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' }));
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -27,13 +28,14 @@ export default function AdminDashboard() {
     if (session?.user?.role === "ADMIN") {
       fetchRecords();
     }
-  }, [session, searchDate, searchQuery]);
+  }, [session, startDate, endDate, searchQuery]);
 
   const fetchRecords = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (searchDate) params.append("date", searchDate);
+      if (startDate) params.append("startDate", startDate);
+      if (endDate) params.append("endDate", endDate);
       if (searchQuery) params.append("search", searchQuery);
 
       const res = await fetch(`/api/attendance?${params.toString()}`);
@@ -81,7 +83,7 @@ export default function AdminDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `attendance_export_${searchDate || 'all'}.csv`);
+    link.setAttribute("download", `attendance_export_${startDate || 'all'}_to_${endDate || 'all'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -130,14 +132,26 @@ export default function AdminDashboard() {
             className="block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-colors"
           />
         </div>
-        <div className="sm:w-64 relative">
+        <div className="sm:w-48 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <CalendarIcon className="h-5 w-5 text-slate-400" />
           </div>
           <input
             type="date"
-            value={searchDate}
-            onChange={(e) => setSearchDate(e.target.value)}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-colors"
+          />
+        </div>
+        <div className="flex items-center justify-center text-slate-400">-</div>
+        <div className="sm:w-48 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <CalendarIcon className="h-5 w-5 text-slate-400" />
+          </div>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
             className="block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-colors"
           />
         </div>

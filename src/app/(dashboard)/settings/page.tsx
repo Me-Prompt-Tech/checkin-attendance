@@ -1,15 +1,16 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useState, useEffect, Suspense } from "react";
 import { redirect, useSearchParams } from "next/navigation";
-import { KeyRound, ShieldCheck, AlertTriangle } from "lucide-react";
+import { KeyRound, ShieldCheck, AlertTriangle, Eye, EyeOff } from "lucide-react";
 
-export default function SettingsPage() {
+function SettingsContent() {
   const { data: session, status, update } = useSession();
   const searchParams = useSearchParams();
   const isForced = searchParams.get("force") === "true" || session?.user?.forcePasswordChange;
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [passwords, setPasswords] = useState({
     currentPassword: "",
@@ -56,16 +57,13 @@ export default function SettingsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({ text: "เปลี่ยนรหัสผ่านสำเร็จ", type: "success" });
+        setMessage({ text: "เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่", type: "success" });
         setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
         
-        // Refresh session to clear forcePasswordChange flag
-        await update();
-        
-        if (isForced) {
-          // If it was forced, remove the force param and reload or redirect to dashboard
-          window.location.href = "/dashboard";
-        }
+        // Force re-login
+        setTimeout(() => {
+          signOut({ callbackUrl: '/login' });
+        }, 1500);
       } else {
         setMessage({ text: data.message || "เกิดข้อผิดพลาด", type: "error" });
       }
@@ -126,42 +124,69 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               รหัสผ่านปัจจุบัน
             </label>
-            <input
-              type="password"
-              name="currentPassword"
-              required
-              value={passwords.currentPassword}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="currentPassword"
+                required
+                value={passwords.currentPassword}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 pr-10 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               รหัสผ่านใหม่ <span className="text-xs text-slate-500 font-normal">(อย่างน้อย 6 ตัวอักษร)</span>
             </label>
-            <input
-              type="password"
-              name="newPassword"
-              required
-              value={passwords.newPassword}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="newPassword"
+                required
+                value={passwords.newPassword}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 pr-10 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               ยืนยันรหัสผ่านใหม่
             </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              required
-              value={passwords.confirmPassword}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="confirmPassword"
+                required
+                value={passwords.confirmPassword}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 pr-10 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="pt-2">
@@ -176,5 +201,13 @@ export default function SettingsPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+      <SettingsContent />
+    </Suspense>
   );
 }

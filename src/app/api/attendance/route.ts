@@ -210,11 +210,18 @@ export async function GET(req: Request) {
     if (session.user.role === 'ADMIN') {
       const { searchParams } = new URL(req.url);
       const dateParam = searchParams.get('date');
+      const startDateParam = searchParams.get('startDate');
+      const endDateParam = searchParams.get('endDate');
       const search = searchParams.get('search');
       
       let whereClause: any = {};
       
-      if (dateParam) {
+      if (startDateParam && endDateParam) {
+        whereClause.date = {
+          gte: new Date(startDateParam),
+          lte: new Date(endDateParam),
+        };
+      } else if (dateParam) {
         whereClause.date = new Date(dateParam);
       }
       
