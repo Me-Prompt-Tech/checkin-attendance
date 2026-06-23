@@ -1,10 +1,10 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { LogOut, User as UserIcon, LayoutDashboard, Shield } from "lucide-react";
+import { LogOut, User as UserIcon, LayoutDashboard, Shield, CalendarDays, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { Profiler, useEffect, useState } from "react";
 
 export default function DashboardLayout({
   children,
@@ -14,10 +14,11 @@ export default function DashboardLayout({
   const { data: session } = useSession();
   const pathname = usePathname();
   const router = useRouter();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   useEffect(() => {
-    if (session?.user?.forcePasswordChange && pathname !== '/settings') {
-      router.push('/settings?force=true');
+    if (session?.user?.forcePasswordChange && pathname !== '/profile') {
+      router.push('/profile?force=true');
     }
   }, [session, pathname, router]);
 
@@ -34,46 +35,53 @@ export default function DashboardLayout({
               </div>
               <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
                 {(session?.user.role === 'EMPLOYEE' || session?.user.role === 'INTERN') && (
-                  <Link
-                    href="/dashboard"
-                    className={`${
-                      pathname === '/dashboard'
-                        ? 'border-blue-500 text-slate-900 dark:text-white'
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
-                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
-                  >
-                    หน้าหลักพนักงาน
-                  </Link>
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className={`${pathname === '/dashboard'
+                          ? 'border-blue-500 text-slate-900 dark:text-white'
+                          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+                        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
+                    >
+                      หน้าหลัก
+                    </Link>
+                    <Link
+                      href="/leaves"
+                      className={`${pathname === '/leaves'
+                          ? 'border-blue-500 text-slate-900 dark:text-white'
+                          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+                        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
+                    >
+                      ขอลางาน
+                    </Link>
+                  </>
                 )}
                 {session?.user.role === 'ADMIN' && (
                   <>
                     <Link
                       href="/admin"
-                      className={`${
-                        pathname === '/admin'
+                      className={`${pathname === '/admin'
                           ? 'border-blue-500 text-slate-900 dark:text-white'
                           : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
-                      } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
+                        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
                     >
                       ประวัติการเข้างาน
                     </Link>
                     <Link
                       href="/admin/password-resets"
-                      className={`${
-                        pathname === '/admin/password-resets'
+                      className={`${pathname === '/admin/password-resets'
                           ? 'border-blue-500 text-slate-900 dark:text-white'
                           : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
-                      } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
+                        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
                     >
                       คำขอรีเซ็ตรหัสผ่าน
                     </Link>
                     <Link
                       href="/admin/users"
-                      className={`${
-                        pathname === '/admin/users'
+                      className={`${pathname === '/admin/users'
                           ? 'border-blue-500 text-slate-900 dark:text-white'
                           : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
-                      } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
+                        } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
                     >
                       จัดการพนักงาน
                     </Link>
@@ -81,30 +89,48 @@ export default function DashboardLayout({
                 )}
               </div>
             </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+
+            <div className="relative">
+              <button 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              >
+                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <UserIcon size={16} />
                 </div>
-                <span>{session?.user?.name || session?.user?.email}</span>
-                <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                  {session?.user?.role}
-                </span>
-              </div>
-              <Link
-                href="/settings"
-                className="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-900"
-              >
-                <span className="hidden sm:inline">ตั้งค่ารหัสผ่าน</span>
-              </Link>
-              <button
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-900"
-              >
-                <LogOut size={16} />
-                <span className="hidden sm:inline">ออกจากระบบ</span>
+                <div className="hidden md:flex flex-col items-start">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-none">
+                    {session?.user?.name || session?.user?.email?.split('@')[0]}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 mt-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 font-medium">
+                    {session?.user?.role}
+                  </span>
+                </div>
               </button>
+
+              {isProfileOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
+                  <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsProfileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                    >
+                      <User size={16} className="text-slate-400" />
+                      <span className="font-medium">My Profile</span>
+                    </Link>
+                    <div className="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
+                    <button
+                      onClick={() => { setIsProfileOpen(false); signOut({ callbackUrl: "/login" }); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                    >
+                      <LogOut size={16} className="text-red-400" />
+                      <span className="font-medium">Sign Out</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -117,16 +143,23 @@ export default function DashboardLayout({
 
       {/* Mobile Bottom Navigation (for Employees only) */}
       {(session?.user.role === 'EMPLOYEE' || session?.user.role === 'INTERN') && (
-        <div className="sm:hidden fixed bottom-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pb-safe">
+        <div className="md:hidden fixed bottom-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pb-safe">
           <div className="flex justify-around">
             <Link
               href="/dashboard"
-              className={`flex flex-col items-center py-3 px-6 ${
-                pathname === '/dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'
-              }`}
+              className={`flex flex-col items-center py-3 px-6 ${pathname === '/dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'
+                }`}
             >
               <LayoutDashboard size={24} />
               <span className="text-xs mt-1">หน้าหลัก</span>
+            </Link>
+            <Link
+              href="/leaves"
+              className={`flex flex-col items-center py-3 px-6 ${pathname === '/leaves' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'
+                }`}
+            >
+              <CalendarDays size={24} />
+              <span className="text-xs mt-1">ขอลางาน</span>
             </Link>
           </div>
         </div>

@@ -3,13 +3,15 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { redirect } from "next/navigation";
-import { Search, Download, Calendar as CalendarIcon, MapPin, MessageSquareText } from "lucide-react";
+import { Search, Download, Calendar as CalendarIcon, MapPin, MessageSquareText, Users, CalendarDays } from "lucide-react";
 import Papa from "papaparse";
+import { LeaveManagement } from "@/components/admin/LeaveManagement";
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'attendance' | 'leaves'>('attendance');
   
   // Filters
   const [startDate, setStartDate] = useState(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' }));
@@ -106,19 +108,49 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">จัดการข้อมูลการเข้างาน</h1>
-        <button
-          onClick={handleExportCSV}
-          disabled={records.length === 0}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
-        >
-          <Download size={18} />
-          Export CSV
-        </button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div className="flex gap-6">
+          <button
+            onClick={() => setActiveTab('attendance')}
+            className={`text-xl font-bold flex items-center gap-2 pb-2 -mb-[17px] border-b-2 transition-colors ${
+              activeTab === 'attendance' 
+                ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' 
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            การเข้างาน
+          </button>
+          <button
+            onClick={() => setActiveTab('leaves')}
+            className={`text-xl font-bold flex items-center gap-2 pb-2 -mb-[17px] border-b-2 transition-colors ${
+              activeTab === 'leaves' 
+                ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' 
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <CalendarDays className="w-5 h-5" />
+            การขอลางาน
+          </button>
+        </div>
+        
+        {activeTab === 'attendance' && (
+          <button
+            onClick={handleExportCSV}
+            disabled={records.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
+          >
+            <Download size={18} />
+            Export CSV
+          </button>
+        )}
       </div>
 
-      {/* Filters */}
+      {activeTab === 'leaves' ? (
+        <LeaveManagement />
+      ) : (
+        <>
+          {/* Filters */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-4">
         <div className="flex-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -256,6 +288,8 @@ export default function AdminDashboard() {
           </table>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

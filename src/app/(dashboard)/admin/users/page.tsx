@@ -3,13 +3,16 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { redirect } from "next/navigation";
-import { UserPlus, Trash2, Shield, User } from "lucide-react";
+import { UserPlus, Trash2, Shield, User, Edit } from "lucide-react";
+import UserProfileEditModal from "@/components/admin/UserProfileEditModal";
 
 export default function ManageUsersPage() {
   const { data: session, status } = useSession();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editingUserName, setEditingUserName] = useState<string>("");
   const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "EMPLOYEE" });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -132,7 +135,7 @@ export default function ManageUsersPage() {
                   บทบาท
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  วันที่สร้าง
+                  สถานะ
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   จัดการ
@@ -181,10 +184,30 @@ export default function ManageUsersPage() {
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                      {new Date(user.createdAt).toLocaleDateString('th-TH')}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        user.employmentStatus === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' :
+                        user.employmentStatus === 'PROBATION' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800' :
+                        user.employmentStatus === 'SUSPENDED' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200 dark:border-orange-800' :
+                        'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800'
+                      }`}>
+                        {user.employmentStatus || 'ACTIVE'}
+                      </span>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        เริ่ม: {user.joinedAt ? new Date(user.joinedAt).toLocaleDateString('th-TH') : '-'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => {
+                          setEditingUserId(user.id);
+                          setEditingUserName(user.name || user.email);
+                        }}
+                        className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors mr-3"
+                        title="แก้ไขประวัติพนักงาน"
+                      >
+                        <Edit size={18} />
+                      </button>
                       <button
                         onClick={() => handleDeleteUser(user.id, user.name || user.email)}
                         disabled={user.id === session.user.id}
@@ -273,6 +296,18 @@ export default function ManageUsersPage() {
           </div>
         </div>
       )}
+
+      {/* Profile Edit Modal */}
+      <UserProfileEditModal
+        userId={editingUserId || ""}
+        userName={editingUserName}
+        isOpen={!!editingUserId}
+        onClose={() => {
+          setEditingUserId(null);
+          setEditingUserName("");
+        }}
+        onSaveSuccess={fetchUsers}
+      />
     </div>
   );
 }

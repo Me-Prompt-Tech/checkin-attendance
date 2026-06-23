@@ -22,6 +22,22 @@ export async function POST(req: Request) {
     }
 
     const userId = session.user.id;
+
+    // เช็กสถานะพนักงานก่อนอนุญาตให้ทำรายการ
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!currentUser) {
+      return NextResponse.json({ message: "ไม่พบข้อมูลผู้ใช้ในระบบ" }, { status: 404 });
+    }
+
+    // @ts-ignore - Bypass TS cache error if Prisma Client is not updated yet
+    const currentStatus = currentUser.employmentStatus;
+
+    if (currentStatus === "RESIGNED" || currentStatus === "SUSPENDED") {
+      return NextResponse.json({ message: `ไม่อนุญาตให้ทำรายการ เนื่องจากสถานะของคุณคือ ${currentStatus}` }, { status: 403 });
+    }
     
     // Server-side Time in UTC
     const serverTime = new Date();
