@@ -16,6 +16,7 @@ export default function ManageUsersPage() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "EMPLOYEE" });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -66,7 +67,11 @@ export default function ManageUsersPage() {
         setIsModalOpen(false);
         fetchUsers();
       } else {
-        setMessage({ text: data.message || "เกิดข้อผิดพลาด", type: "error" });
+        if (data.message?.includes("อีเมล") || res.status === 400) {
+          setEmailError(data.message || "เกิดข้อผิดพลาดในการเพิ่มพนักงาน");
+        } else {
+          setMessage({ text: data.message || "เกิดข้อผิดพลาด", type: "error" });
+        }
       }
     } catch (error) {
       setMessage({ text: "ระบบขัดข้อง", type: "error" });
@@ -115,7 +120,10 @@ export default function ManageUsersPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">จัดการข้อมูลพนักงาน</h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setIsModalOpen(true);
+            setEmailError("");
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
         >
           <UserPlus size={18} />
@@ -249,9 +257,18 @@ export default function ManageUsersPage() {
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => {
+                    setFormData({...formData, email: e.target.value});
+                    if (emailError) setEmailError("");
+                  }}
+                  className={`w-full rounded-lg border ${emailError ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 dark:border-slate-700 focus:ring-blue-500'} bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-white focus:ring-2`}
                 />
+                {emailError && (
+                  <p className="mt-1.5 text-sm text-red-500 flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-red-500"></span>
+                    {emailError}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">รหัสผ่านเริ่มต้น</label>

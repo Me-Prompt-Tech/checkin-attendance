@@ -19,6 +19,8 @@ export async function GET() {
         email: true,
         role: true,
         createdAt: true,
+        employmentStatus: true,
+        joinedAt: true,
       },
     });
 
@@ -60,6 +62,10 @@ export async function POST(req: Request) {
         email,
         password: hashedPassword,
         role: role || "EMPLOYEE",
+        forcePasswordChange: true,
+        profile: {
+          create: {}
+        }
       },
       select: {
         id: true,

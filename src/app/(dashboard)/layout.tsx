@@ -90,7 +90,7 @@ export default function DashboardLayout({
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative mt-2">
               <button 
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50"
@@ -111,7 +111,7 @@ export default function DashboardLayout({
               {isProfileOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
-                  <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
                     <Link
                       href="/profile"
                       onClick={() => setIsProfileOpen(false)}
@@ -126,7 +126,7 @@ export default function DashboardLayout({
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
                     >
                       <LogOut size={16} className="text-red-400" />
-                      <span className="font-medium">Sign Out</span>
+                      <span className="font-medium">ออกจากระบบ</span>
                     </button>
                   </div>
                 </>
