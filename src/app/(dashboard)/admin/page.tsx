@@ -108,11 +108,11 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div className="flex gap-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex gap-6 w-full sm:w-auto">
           <button
             onClick={() => setActiveTab('attendance')}
-            className={`lg:text-xl font-bold flex items-center gap-2 pb-2 -mb-[17px] border-b-2 transition-colors ${activeTab === 'attendance'
+            className={`lg:text-xl font-bold flex items-center gap-2 pb-3 -mb-px border-b-2 transition-colors ${activeTab === 'attendance'
                 ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
               }`}
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('leaves')}
-            className={`lg:text-xl font-bold flex items-center gap-2 pb-2 -mb-[17px] border-b-2 transition-colors ${activeTab === 'leaves'
+            className={`lg:text-xl font-bold flex items-center gap-2 pb-3 -mb-px border-b-2 transition-colors ${activeTab === 'leaves'
                 ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
               }`}
@@ -133,14 +133,16 @@ export default function AdminDashboard() {
         </div>
 
         {activeTab === 'attendance' && (
-          <button
-            onClick={handleExportCSV}
-            disabled={records.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-sm md:text-base text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
-          >
-            <Download size={18} />
-            Export CSV
-          </button>
+          <div className="pb-3 w-full sm:w-auto">
+            <button
+              onClick={handleExportCSV}
+              disabled={records.length === 0}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-sm md:text-base text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
+            >
+              <Download size={18} />
+              Export CSV
+            </button>
+          </div>
         )}
       </div>
 
